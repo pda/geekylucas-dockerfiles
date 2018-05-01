@@ -6,11 +6,22 @@ set -u
 CONTAINER="1p"
 
 main() {
-if docker inspect "$CONTAINER" &>/dev/null; then
-  docker_start
-else
-  docker_run
-fi
+  authorize_x11
+  docker_run_or_start
+}
+
+authorize_x11() {
+  if ! xhost | grep '^LOCAL:$' >/dev/null; then
+    xhost local:root
+  fi
+}
+
+docker_run_or_start() {
+  if docker inspect "$CONTAINER" &>/dev/null; then
+    docker_start
+  else
+    docker_run
+  fi
 }
 
 docker_run() {
